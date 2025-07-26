@@ -1,0 +1,37 @@
+﻿@page "/employees/work-logs/{id:int}"
+@using ExcelAndBlazorApp.Shared.Dtos
+@inject HttpClient Http
+
+
+@if (employee is null)
+{
+    <p>Ładowanie danych...</p>
+}
+else
+{
+    <h1>Czas pracy dla @employee.Name</h1>
+    <h1>Pesel: @employee.PESEL</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+
+                <th>Data rejestracji</th>
+                <th>Czas pracy</th>
+                <th>Zarobek brutto pracownika</th>
+                <th>Zarobek netto pracownika</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var workLog in employee.WorkLogs)
+            {
+                <tr>
+                    <td>@workLog.Date</td>
+                    <td>@workLog.HoursWorked</td>
+                    <td>@workLog.CostNet.ToString("F2")</td>
+                    <td>@workLog.CostGross.ToString("F2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

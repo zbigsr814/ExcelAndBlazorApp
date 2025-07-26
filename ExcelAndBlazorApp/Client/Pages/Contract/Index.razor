@@ -1,0 +1,34 @@
+﻿@page "/contracts"
+@using ExcelAndBlazorApp.Shared.Dtos
+@inject HttpClient Http
+
+@if (contracts is null)
+{
+    <p>Ładowanie danych...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nazwa klienta</th>
+                <th>Przychód brutto</th>
+                <th>Przychód netto</th>
+                <th>Rozpoczęcie projektu</th>
+                <th>Planowana data zakończenia projektu</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contract in contracts)
+            {
+                <tr>
+                    <td>@contract.ClientName</td>
+                    <td>@contract.RevenueGross</td>
+                    <td>@contract.RevenueNet.ToString("F2")</td>
+                    <td>@contract.StartDate</td>
+                    <td>@contract.EndDate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

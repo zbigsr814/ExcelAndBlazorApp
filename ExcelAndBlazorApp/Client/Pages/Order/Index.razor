@@ -1,0 +1,36 @@
+﻿@page "/orders"
+@using ExcelAndBlazorApp.Shared.Dtos
+@inject HttpClient Http
+
+@if (orders is null)
+{
+    <p>Ladowanie danych...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Numer zamówienia</th>
+                <th>Data zamówienia</th>
+                <th>Koszt brutto</th>
+                <th>Koszt netto</th>
+                <th>Zakupione przedmioty</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>@order.OrderNumber</td>
+                    <td>@order.Date</td>
+                    <td>@order.TotalGross</td>
+                    <td>@order.TotalNet.ToString("F2")</td>
+                    <td>
+                        <a class="btn btn-primary" href="/orders/order-items/@order.Id"  role="button">Szczegóły</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

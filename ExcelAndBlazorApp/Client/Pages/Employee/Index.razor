@@ -1,0 +1,36 @@
+﻿@page "/employees"
+@using ExcelAndBlazorApp.Shared.Dtos
+@inject HttpClient Http
+
+@if (employees is null)
+{
+    <p>Ładowanie danych...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Imie i nazwisko</th>
+                <th>PESEL</th>
+                <th>Stanowisko</th>
+                <th>Stawka brutto godzinowa</th>
+                <th>Czasy pracy</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.Name</td>
+                    <td>@employee.PESEL</td>
+                    <td>@employee.Position</td>
+                    <td>@employee.HourlyRateGross</td>
+                    <td>
+                        <a class="btn btn-primary" href="/employees/work-logs/@employee.Id" role="button">Szczegóły</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
