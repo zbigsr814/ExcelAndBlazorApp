@@ -32,5 +32,38 @@ namespace ExcelAndBlazorApp.Controllers
 
             return contracts;
         }
-    }
+
+        [HttpPost]
+        public IActionResult Post(ContractDto contract)
+        {
+            _dbContext.contracts
+                .Add(new Contract()
+                {
+                    Id = contract.Id,
+                    ClientName = contract.ClientName,
+                    RevenueGross = contract.RevenueGross,
+                    StartDate = contract.StartDate,
+                    EndDate = contract.EndDate
+                });
+
+            _dbContext.SaveChanges();
+            return Ok();
+		}
+
+		[HttpDelete("{id}")]
+		public IActionResult Delete(int id)
+		{
+			var entity = _dbContext.contracts.FirstOrDefault(c => c.Id == id);
+
+			if (entity == null)
+			{
+				return NotFound();
+			}
+
+			_dbContext.contracts.Remove(entity);
+			_dbContext.SaveChanges();
+
+            return Ok();
+		}
+	}
 }

@@ -1,34 +1,59 @@
 ﻿@page "/contracts"
+@using ExcelAndBlazorApp.Client.Components
 @using ExcelAndBlazorApp.Shared.Dtos
 @inject HttpClient Http
 
 @if (contracts is null)
 {
-    <p>Ładowanie danych...</p>
+	<p>Ładowanie danych...</p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nazwa klienta</th>
-                <th>Przychód brutto</th>
-                <th>Przychód netto</th>
-                <th>Rozpoczęcie projektu</th>
-                <th>Planowana data zakończenia projektu</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var contract in contracts)
-            {
-                <tr>
-                    <td>@contract.ClientName</td>
-                    <td>@contract.RevenueGross</td>
-                    <td>@contract.RevenueNet.ToString("F2")</td>
-                    <td>@contract.StartDate</td>
-                    <td>@contract.EndDate</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<div class="row">
+		<div class="col-lg-8">
+			<div class="card">
+				<div class="card-header">
+					Kontrakty
+				</div>
+				<div class="card-body">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Nazwa klienta</th>
+								<th>Przychód brutto</th>
+								<th>Przychód netto</th>
+								<th>Rozpoczęcie projektu</th>
+								<th>Planowana data zakończenia projektu</th>
+								<th>&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var contract in contracts)
+							{
+								<tr>
+									<td>@contract.ClientName</td>
+									<td>@contract.RevenueGross</td>
+									<td>@contract.RevenueNet.ToString("F2")</td>
+									<td>@contract.StartDate</td>
+									<td>@contract.EndDate</td>
+									<td><button type="button" class="btn btn-danger btn-sm" @onclick="() => OpenDeleteDialog(contract)">Usuń</button></td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<br />
+	<div class="col-lg-4">
+		<ContractForm OnSubmitCallback="@Refresh"></ContractForm>
+	</div>
+	@if (DeleteDialogOpen)
+	{
+		<ModalDialog Title="Usunąć rekord." Text="Czy napewno?" OnClose=@OnDeleteDialogClose DialogType="ModalDialog.ModalDialogType.DeleteCancel"></ModalDialog>
+	}
+	<br />
+	<br />
+	<br />
 }

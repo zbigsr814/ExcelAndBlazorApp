@@ -1,0 +1,51 @@
+﻿@using ExcelAndBlazorApp.Client.Components;
+@using ExcelAndBlazorApp.Shared.Dtos;
+@inject HttpClient Http;
+
+<div class="card">
+	<div class="card-header">
+		Dodaj kontrakt
+	</div>
+	<div class="card-body">
+		<EditForm Model="@contractDto" OnValidSubmit="@HandleValidSubmit">
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<div class="form-group">
+				<label for="dateInput">Nazwa klienta:</label>
+				<InputText class="form-control" id="dateInput" @bind-Value="contractDto.ClientName" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Dochód brutto</label>
+				<InputNumber class="form-control" id="subjectInput" @bind-Value="contractDto.RevenueGross" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Dochód netto</label>
+				<InputNumber class="form-control" id="subjectInput" @bind-Value="contractDto.RevenueNet" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Rozpoczęcie projektu</label>
+				<InputDate class="form-control" id="subjectInput" @bind-Value="contractDto.StartDate" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Planowana data zakończenia projektu</label>
+				<InputDate class="form-control" id="subjectInput" @bind-Value="contractDto.EndDate" />
+			</div>
+			<div>
+				<button type="submit" class="btn btn-primary">Dodaj</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	private ContractDto contractDto = new ContractDto();
+
+	[Parameter]
+	public EventCallback OnSubmitCallback { get; set; }
+
+	public async Task HandleValidSubmit()
+	{
+		await Http.PostAsJsonAsync<ContractDto>("api/contracts", contractDto);
+		await OnSubmitCallback.InvokeAsync();
+	}
+}
