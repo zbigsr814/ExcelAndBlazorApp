@@ -48,4 +48,16 @@
 		await Http.PostAsJsonAsync<ContractDto>("api/contracts", contractDto);
 		await OnSubmitCallback.InvokeAsync();
 	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		contractDto.StartDate = DateTime.Today;
+		contractDto.EndDate = DateTime.Today;
+		StateHasChanged();
+	}
 }

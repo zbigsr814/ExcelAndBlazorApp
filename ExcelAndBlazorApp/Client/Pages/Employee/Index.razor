@@ -1,36 +1,95 @@
 ﻿@page "/employees"
+@using ExcelAndBlazorApp.Client.Components
 @using ExcelAndBlazorApp.Shared.Dtos
 @inject HttpClient Http
 
 @if (employees is null)
 {
-    <p>Ładowanie danych...</p>
+	<p>Ładowanie danych...</p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Imie i nazwisko</th>
-                <th>PESEL</th>
-                <th>Stanowisko</th>
-                <th>Stawka brutto godzinowa</th>
-                <th>Czasy pracy</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var employee in employees)
-            {
-                <tr>
-                    <td>@employee.Name</td>
-                    <td>@employee.PESEL</td>
-                    <td>@employee.Position</td>
-                    <td>@employee.HourlyRateGross</td>
-                    <td>
-                        <a class="btn btn-primary" href="/employees/work-logs/@employee.Id" role="button">Szczegóły</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Imie i nazwisko</th>
+				<th>PESEL</th>
+				<th>Stanowisko</th>
+				<th>Stawka brutto godzinowa</th>
+				<th>Czasy pracy</th>
+				<th>&nbsp;</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var employee in employees)
+			{
+				<tr>
+					<td>@employee.Name</td>
+					<td>@employee.PESEL</td>
+					<td>@employee.Position</td>
+					<td>@employee.HourlyRateGross</td>
+					<td>
+						<a class="btn btn-primary" href="/employees/@employee.Id" role="button">Szczegóły</a>
+					</td>
+					<td><button type="button" class="btn btn-danger btn-sm" @onclick="() => OpenDeleteDialog(employee)">Usuń</button></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	<br />
+	<div class="col-lg-4">
+		<EmployeeForm OnSubmitCallback="@Refresh"></EmployeeForm>
+	</div>
+
+	@if (DeleteDialogOpen)
+	{
+		<ModalDialog Title="Usunąć rekord." Text="Czy napewno?" OnClose=@OnDeleteDialogClose DialogType="ModalDialog.ModalDialogType.DeleteCancel"></ModalDialog>
+	}
+	<br />
+	<br />
+	<br />
+}
+
+
+@code {
+	private EmployeeDto[] employees;
+	private EmployeeDto _employeeToDelete;
+	public bool DeleteDialogOpen { get; set; }
+
+	public void OpenDeleteDialog(EmployeeDto employee)
+	{
+		DeleteDialogOpen = true;
+		_employeeToDelete = employee;
+		StateHasChanged();
+	}
+
+	public async Task OnDeleteDialogClose(bool accepted)
+	{
+		if (accepted)
+		{
+			await Http.DeleteAsync($"api/employees/{_employeeToDelete.Id}");
+			await LoadData();
+			_employeeToDelete = null;
+		}
+
+		DeleteDialogOpen = false;
+		StateHasChanged();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		employees = await Http.GetFromJsonAsync<EmployeeDto[]>("api/employees");
+		StateHasChanged();
+	}
+
+	public async Task Refresh()
+	{
+		await LoadData();
+	}
 }

@@ -1,0 +1,56 @@
+﻿@using ExcelAndBlazorApp.Client.Components;
+@using ExcelAndBlazorApp.Shared.Dtos;
+@inject HttpClient Http;
+
+<div class="card">
+	<div class="card-header">
+		Dodaj czas pracy
+	</div>
+	<div class="card-body">
+		<EditForm Model="@orderItemDto" OnValidSubmit="@HandleValidSubmit">
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<div class="form-group">
+				<label for="subjectInput">Przedmiot zamówienia:</label>
+				<InputText class="form-control" id="subjectInput" @bind-Value="orderItemDto.ItemName" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Cena brutto:</label>
+				<InputNumber class="form-control" id="subjectInput" @bind-Value="orderItemDto.PriceGross" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Ilość:</label>
+				<InputNumber class="form-control" id="subjectInput" @bind-Value="orderItemDto.Quantity" />
+			</div>
+			<div>
+				<button type="submit" class="btn btn-primary">Dodaj</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	private OrderItemDto orderItemDto = new OrderItemDto();
+
+	[Parameter]
+	public int OrderId { get; set; }
+	[Parameter]
+	public EventCallback OnSubmitCallback { get; set; }
+
+	public async Task HandleValidSubmit()
+	{
+		await Http.PostAsJsonAsync<OrderItemDto>($"api/orders/{OrderId}", orderItemDto);
+		await OnSubmitCallback.InvokeAsync();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		orderItemDto.OrderId = OrderId;
+		StateHasChanged();
+	}
+}

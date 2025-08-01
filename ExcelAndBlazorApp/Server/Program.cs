@@ -11,6 +11,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<CompanySeeder>();
+builder.Services.AddAutoMapper(typeof(MappingProfile));     // skanuje automatycznie wszystkie profile w projekcie
 
 builder.Services.AddDbContext<CompanyDbContext>(
 	options => options.UseSqlServer(builder.Configuration.GetConnectionString("Company")));

@@ -1,4 +1,5 @@
-﻿@page "/orders/order-items/{id:int}"
+﻿@page "/orders/{id:int}"
+@using ExcelAndBlazorApp.Client.Components
 @using ExcelAndBlazorApp.Shared.Dtos
 @inject HttpClient Http
 
@@ -9,14 +10,15 @@
 }
 else
 {
-    <h1>Przedmioty zamówienia @order.OrderNumber z dnia @order.Date</h1>
-    <table class="table">
+    <h1>Przedmioty zamówienia @order.OrderNumber z dnia @order.DateFormatted</h1>
+    <table class="table table-striped">
         <thead>
             <tr>
 
                 <th>Przedmiot</th>
                 <th>Koszt brutto</th>
                 <th>Ilość</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>
@@ -26,9 +28,67 @@ else
                     <td>@orderItem.ItemName</td>
                     <td>@orderItem.PriceGross</td>
                     <td>@orderItem.Quantity</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => OpenDeleteDialog(orderItem)">Usuń</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
+
+    <br />
+    <div class="col-lg-4">
+        <OrderItemForm OrderId="@order.Id" OnSubmitCallback="@Refresh"></OrderItemForm>
+    </div>
+    @if (DeleteDialogOpen)
+	{
+		<ModalDialog Title="Usunąć rekord." Text="Czy napewno?" OnClose=@OnDeleteDialogClose DialogType="ModalDialog.ModalDialogType.DeleteCancel"></ModalDialog>
+	}
+	<br />
+	<br />
+	<br />
 }
 
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private OrderDto order;
+    private OrderItemDto _orderItemToDelete;
+    public bool DeleteDialogOpen { get; set; }
+
+    public void OpenDeleteDialog(OrderItemDto orderitem)
+    {
+        DeleteDialogOpen = true;
+        _orderItemToDelete = orderitem;
+        StateHasChanged();
+    }
+
+    public async Task OnDeleteDialogClose(bool accepted)
+    {
+        if (accepted)
+        {
+            await Http.DeleteAsync($"api/orders/{Id}/{_orderItemToDelete.Id}");
+            await LoadData();
+            _orderItemToDelete = null;
+        }
+
+        DeleteDialogOpen = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        order = await Http.GetFromJsonAsync<OrderDto>($"api/orders/{Id}");
+        StateHasChanged();
+    }
+
+    public async Task Refresh()
+    {
+        await LoadData();
+    }
+}

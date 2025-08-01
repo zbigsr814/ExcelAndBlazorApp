@@ -9,42 +9,32 @@
 }
 else
 {
-	<div class="row">
-		<div class="col-lg-8">
-			<div class="card">
-				<div class="card-header">
-					Kontrakty
-				</div>
-				<div class="card-body">
-					<table class="table table-striped">
-						<thead>
-							<tr>
-								<th>Nazwa klienta</th>
-								<th>Przychód brutto</th>
-								<th>Przychód netto</th>
-								<th>Rozpoczęcie projektu</th>
-								<th>Planowana data zakończenia projektu</th>
-								<th>&nbsp;</th>
-							</tr>
-						</thead>
-						<tbody>
-							@foreach (var contract in contracts)
-							{
-								<tr>
-									<td>@contract.ClientName</td>
-									<td>@contract.RevenueGross</td>
-									<td>@contract.RevenueNet.ToString("F2")</td>
-									<td>@contract.StartDate</td>
-									<td>@contract.EndDate</td>
-									<td><button type="button" class="btn btn-danger btn-sm" @onclick="() => OpenDeleteDialog(contract)">Usuń</button></td>
-								</tr>
-							}
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Nazwa klienta</th>
+				<th>Przychód brutto</th>
+				<th>Przychód netto</th>
+				<th>Rozpoczęcie projektu</th>
+				<th>Planowana data zakończenia projektu</th>
+				<th>&nbsp;</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var contract in contracts)
+			{
+				<tr>
+					<td>@contract.ClientName</td>
+					<td>@contract.RevenueGross</td>
+					<td>@contract.RevenueNet.ToString("F2")</td>
+					<td>@contract.StartDateFormatted</td>
+					<td>@contract.EndDateFormatted</td>
+					<td><button type="button" class="btn btn-danger btn-sm" @onclick="() => OpenDeleteDialog(contract)">Usuń</button></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
 	<br />
 	<div class="col-lg-4">
 		<ContractForm OnSubmitCallback="@Refresh"></ContractForm>
@@ -56,4 +46,46 @@ else
 	<br />
 	<br />
 	<br />
+}
+
+@code {
+	private ContractDto[] contracts;
+	private ContractDto _contractToDelete;
+	public bool DeleteDialogOpen { get; set; }
+
+	public void OpenDeleteDialog(ContractDto contract)
+	{
+		DeleteDialogOpen = true;
+		_contractToDelete = contract;
+		StateHasChanged();
+	}
+
+	public async Task OnDeleteDialogClose(bool accepted)
+	{
+		if (accepted)
+		{
+			await Http.DeleteAsync($"api/contracts/{_contractToDelete.Id}");
+			await LoadData();
+			_contractToDelete = null;
+		}
+
+		DeleteDialogOpen = false;
+		StateHasChanged();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		contracts = await Http.GetFromJsonAsync<ContractDto[]>("api/contracts");
+		StateHasChanged();
+	}
+
+	public async Task Refresh()
+	{
+		await LoadData();
+	}
 }

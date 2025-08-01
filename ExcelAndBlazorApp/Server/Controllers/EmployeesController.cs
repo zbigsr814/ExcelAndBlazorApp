@@ -1,4 +1,5 @@
-﻿using ExcelAndBlazorApp.Entities;
+﻿using AutoMapper;
+using ExcelAndBlazorApp.Entities;
 using ExcelAndBlazorApp.Shared.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,60 +12,98 @@ namespace ExcelAndBlazorApp.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly CompanyDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        public EmployeesController(CompanyDbContext _dbContext)
+        public EmployeesController(CompanyDbContext _dbContext, IMapper mapper)
         {
             this._dbContext = _dbContext;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<EmployeeDto>> GetEmployees()
         {
-            var employees = _dbContext.employees
-                .Select(e => new EmployeeDto()
-                {
-                    Id = e.Id,
-                    Name = e.Name,
-                    PESEL = e.PESEL,
-                    Position = e.Position,
-                    HourlyRateGross = e.HourlyRateGross
-                }).ToList();
+            var employees = _dbContext.employees.ToList();
+            var dtos = _mapper.Map<List<EmployeeDto>>(employees);
 
-            if (employees is null)
+            if (dtos is null)
                 return NotFound();
 
-            return Ok(employees);
+            return Ok(dtos);
         }
 
         [HttpGet]
-        [Route("work-logs/{id}")]
-        public ActionResult<IEnumerable<EmployeeDto>> GetWorkLogs([FromRoute] int Id)
+        [Route("{id}")]
+        public ActionResult<EmployeeDto> GetWorkLogs([FromRoute] int Id)
         {
             var employees = _dbContext.employees
-                .Include(wl => wl.WorkLogs)
-                .Where(wl => wl.Id == Id)
-                .Select(e => new EmployeeDto()
-                {
-                    Id = e.Id,
-                    Name = e.Name,
-                    PESEL = e.PESEL,
-                    Position = e.Position,
-                    HourlyRateGross = e.HourlyRateGross,
-                    WorkLogs = e.WorkLogs.Select(wl => new WorkLogDto()
-                    {
-                        Id = wl.Id,
-                        EmployeeId = wl.EmployeeId,
-                        Date = wl.Date,
-                        HoursWorked = wl.HoursWorked,
-                        CostGross = wl.HoursWorked * e.HourlyRateGross,
-                        CostNet = (wl.HoursWorked * e.HourlyRateGross) / 1.23m
-                    }).ToList()
-                }).FirstOrDefault();
+                .Include(e => e.WorkLogs)
+                .Where(e => e.Id == Id)
+                .FirstOrDefault();
 
-            if (employees is null)
+            var dtos = _mapper.Map<EmployeeDto>(employees);
+
+            if (dtos is null)
                 return NotFound();
 
-            return Ok(employees);
+            return Ok(dtos);
+        }
+
+        [HttpPost]
+        public IActionResult PostEmployee([FromBody] EmployeeDto employee)
+        {
+            var entity = _mapper.Map<Employee>(employee);
+
+            _dbContext.employees.Add(entity);
+            _dbContext.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpPost("{id}")]
+        public IActionResult PostWorkItem([FromBody] WorkLogDto workLog)
+        {
+            var entity = _mapper.Map<WorkLog>(workLog);
+
+            _dbContext.workLogs.Add(entity);
+            _dbContext.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteEmployee(int id)
+        {
+            var entity = _dbContext.employees.FirstOrDefault(c => c.Id == id);
+
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.employees.Remove(entity);
+            _dbContext.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpDelete("{employeeId}/{workLogId}")]
+        public IActionResult DeleteWorkLog([FromRoute] int employeeId, [FromRoute] int workLogId)
+        {
+            var entity = _dbContext.workLogs
+                .Where(wl => wl.EmployeeId == employeeId)
+                .Where(wl => wl.Id == workLogId)
+                .FirstOrDefault();
+
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.workLogs.Remove(entity);
+            _dbContext.SaveChanges();
+
+            return Ok();
         }
     }
 }

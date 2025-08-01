@@ -14,8 +14,10 @@ namespace ExcelAndBlazorApp.Shared.Dtos
         public decimal RevenueNet { get; set; }
         [Required]
         public DateTime StartDate { get; set; }
-        [Required]
+        public string StartDateFormatted => StartDate.ToString("dd/MM/yyyy");
+		[Required]
         public DateTime EndDate { get; set; }
-    }
+		public string EndDateFormatted => EndDate.ToString("dd/MM/yyyy");
+	}
 
 }

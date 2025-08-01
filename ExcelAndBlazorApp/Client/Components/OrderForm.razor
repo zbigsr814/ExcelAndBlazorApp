@@ -1,0 +1,50 @@
+﻿@using ExcelAndBlazorApp.Client.Components;
+@using ExcelAndBlazorApp.Shared.Dtos;
+@inject HttpClient Http;
+
+<div class="card">
+	<div class="card-header">
+		Dodaj zamówienie
+	</div>
+	<div class="card-body">
+		<EditForm Model="@orderDto" OnValidSubmit="@HandleValidSubmit">
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<div class="form-group">
+				<label for="dateInput">Kod zamówienia:</label>
+				<InputText class="form-control" id="dateInput" @bind-Value="orderDto.OrderNumber" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Data:</label>
+				<InputDate class="form-control" id="subjectInput" @bind-Value="orderDto.Date" />
+			</div>
+			<div>
+				<button type="submit" class="btn btn-primary">Dodaj</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	private OrderDto orderDto = new OrderDto();
+
+	[Parameter]
+	public EventCallback OnSubmitCallback { get; set; }
+
+	public async Task HandleValidSubmit()
+	{
+		await Http.PostAsJsonAsync<OrderDto>("api/orders", orderDto);
+		await OnSubmitCallback.InvokeAsync();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		orderDto.Date = DateTime.Today;
+		StateHasChanged();
+	}
+}

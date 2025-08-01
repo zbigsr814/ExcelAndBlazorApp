@@ -1,0 +1,53 @@
+﻿@using ExcelAndBlazorApp.Client.Components;
+@using ExcelAndBlazorApp.Shared.Dtos;
+@inject HttpClient Http;
+
+<div class="card">
+	<div class="card-header">
+		Dodaj czas pracy
+	</div>
+	<div class="card-body">
+		<EditForm Model="@workLogDto" OnValidSubmit="@HandleValidSubmit">
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<div class="form-group">
+				<label for="subjectInput">Data:</label>
+				<InputDate class="form-control" id="subjectInput" @bind-Value="workLogDto.Date" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Ilość godzin pracy:</label>
+				<InputNumber class="form-control" id="subjectInput" @bind-Value="workLogDto.HoursWorked" />
+			</div>
+			<div>
+				<button type="submit" class="btn btn-primary">Dodaj</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	private WorkLogDto workLogDto = new WorkLogDto();
+
+	[Parameter]
+	public int EmployeeId { get; set; }
+	[Parameter]
+	public EventCallback OnSubmitCallback { get; set; }
+
+	public async Task HandleValidSubmit()
+	{
+		await Http.PostAsJsonAsync<WorkLogDto>($"api/employees/{EmployeeId}", workLogDto);
+		await OnSubmitCallback.InvokeAsync();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		workLogDto.Date = DateTime.Today;
+		workLogDto.EmployeeId = EmployeeId;
+		StateHasChanged();
+	}
+}

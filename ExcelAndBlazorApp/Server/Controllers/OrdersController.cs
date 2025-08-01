@@ -1,4 +1,5 @@
-﻿using ExcelAndBlazorApp.Entities;
+﻿using AutoMapper;
+using ExcelAndBlazorApp.Entities;
 using ExcelAndBlazorApp.Shared.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,62 +12,100 @@ namespace ExcelAndBlazorApp.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly CompanyDbContext _dbContext;
+		private readonly IMapper _mapper;
 
-        public OrdersController(CompanyDbContext _dbContext)
+		public OrdersController(CompanyDbContext _dbContext, IMapper mapper)
         {
             this._dbContext = _dbContext;
-        }
+			_mapper = mapper;
+		}
 
         [HttpGet]
         public ActionResult<IEnumerable<OrderDto>> GetOrders()
         {
             var orders = _dbContext.orders
-                .Select(o => new OrderDto()
-                {
-                    Id = o.Id,
-                    Date = o.Date,
-                    OrderNumber = o.OrderNumber,
-                    TotalGross = o.TotalGross,
-                    TotalNet = o.TotalNet
-                })
+                .Include(o => o.Items)
                 .ToList();
+            var dtos = _mapper.Map<List<OrderDto>>(orders);
 
             if (orders is null)
                 return NotFound();
 
-            return Ok(orders);
+            return Ok(dtos);
         }
 
         [HttpGet]
-        [Route("order-items/{id}")]
+        [Route("{id}")]
         public ActionResult<OrderDto> GetOrderItems([FromRoute] int Id)
         {
             var order = _dbContext.orders
                 .Include(o => o.Items)
                 .Where(o => o.Id == Id)
-                .Select(o => new OrderDto()
-                {
-                    Id = o.Id,
-                    Date = o.Date,
-                    OrderNumber = o.OrderNumber,
-                    TotalGross = o.TotalGross,
-                    TotalNet = o.TotalNet,
-                    Items = o.Items.Select(oi => new OrderItemDto()
-                    {
-                        Id = oi.Id,
-                        ItemName = oi.ItemName,
-                        OrderId = oi.OrderId,
-                        PriceGross = oi.PriceGross,
-                        Quantity = oi.Quantity
-                    }).ToList()
+                .FirstOrDefault();          //
 
-                })
-            .FirstOrDefault();
+            var dto = _mapper.Map<OrderDto>(order);
 
             if (order is null)
                 return NotFound();
 
-            return Ok(order);
+            return Ok(dto);
+        }
+
+		[HttpPost]
+		public IActionResult PostOrder([FromBody] OrderDto order)
+		{
+			var entity = _mapper.Map<Order>(order);
+
+			_dbContext.orders.Add(entity);
+			_dbContext.SaveChanges();
+
+			return Ok();
+		}
+
+		[HttpPost("{id}")]
+		public IActionResult PostOrderItem([FromBody] OrderItemDto orderItem)
+		{
+			var entity = _mapper.Map<OrderItem>(orderItem);
+
+			_dbContext.orderItems.Add(entity);
+			_dbContext.SaveChanges();
+
+			return Ok();
+		}
+
+		[HttpDelete("{id}")]
+        public IActionResult DeleteEmployee(int id)
+        {
+            var entity = _dbContext.orders.FirstOrDefault(c => c.Id == id);
+
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.orders.Remove(entity);
+            _dbContext.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpDelete("{orderId}/{orderItemId}")]
+        public IActionResult DeleteWorkLog([FromRoute] int orderId, [FromRoute] int orderItemId)
+        {
+            var entity = _dbContext.orderItems
+                .Where(wl => wl.OrderId == orderId)
+                .Where(wl => wl.Id == orderItemId)
+                .FirstOrDefault();
+
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.orderItems.Remove(entity);
+            _dbContext.SaveChanges();
+
+            return Ok();
         }
     }
 }

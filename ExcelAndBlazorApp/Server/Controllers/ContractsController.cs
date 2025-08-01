@@ -1,4 +1,5 @@
-﻿using ExcelAndBlazorApp.Entities;
+﻿using AutoMapper;
+using ExcelAndBlazorApp.Entities;
 using ExcelAndBlazorApp.Shared.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,44 +11,35 @@ namespace ExcelAndBlazorApp.Controllers
     public class ContractsController : ControllerBase
     {
         private readonly CompanyDbContext _dbContext;
+		private readonly IMapper _mapper;
 
-        public ContractsController(CompanyDbContext _dbContext)
+		public ContractsController(CompanyDbContext _dbContext, IMapper mapper)
         {
             this._dbContext = _dbContext;
-        }
+			_mapper = mapper;
+		}
 
         [HttpGet]
-        public IEnumerable<ContractDto> GetAll()
+        public ActionResult<IEnumerable<ContractDto>> GetAll()
         {
-            var contracts = _dbContext.contracts
-                .Select(c => new ContractDto()
-                {
-                    Id = c.Id,
-                    ClientName = c.ClientName,
-                    RevenueGross = c.RevenueGross,
-                    RevenueNet = c.RevenueNet,
-                    StartDate = c.StartDate,
-                    EndDate = c.EndDate
-                }).ToList();
+            var contracts = _dbContext.contracts.ToList();
+            var dtos = _mapper.Map<List<ContractDto>>(contracts);
 
-            return contracts;
+			if (dtos is null)
+				return NotFound();
+
+			return dtos;
         }
 
         [HttpPost]
         public IActionResult Post(ContractDto contract)
         {
-            _dbContext.contracts
-                .Add(new Contract()
-                {
-                    Id = contract.Id,
-                    ClientName = contract.ClientName,
-                    RevenueGross = contract.RevenueGross,
-                    StartDate = contract.StartDate,
-                    EndDate = contract.EndDate
-                });
+            var dto = _mapper.Map<Contract>(contract);
 
+            _dbContext.contracts.Add(dto);
             _dbContext.SaveChanges();
-            return Ok();
+
+			return Ok();
 		}
 
 		[HttpDelete("{id}")]

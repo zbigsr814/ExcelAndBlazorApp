@@ -1,0 +1,47 @@
+﻿@using ExcelAndBlazorApp.Client.Components;
+@using ExcelAndBlazorApp.Shared.Dtos;
+@inject HttpClient Http;
+
+<div class="card">
+	<div class="card-header">
+		Dodaj pracownika
+	</div>
+	<div class="card-body">
+		<EditForm Model="@employeeDto" OnValidSubmit="@HandleValidSubmit">
+			<DataAnnotationsValidator />
+			<ValidationSummary />
+			<div class="form-group">
+				<label for="dateInput">Imię i nazwisko:</label>
+				<InputText class="form-control" id="dateInput" @bind-Value="employeeDto.Name" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">PESEL:</label>
+				<InputText class="form-control" id="subjectInput" @bind-Value="employeeDto.PESEL" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Stanowisko:</label>
+				<InputText class="form-control" id="subjectInput" @bind-Value="employeeDto.Position" />
+			</div>
+			<div class="form-group">
+				<label for="subjectInput">Stawka brutto:</label>
+				<InputNumber class="form-control" id="subjectInput" @bind-Value="employeeDto.HourlyRateGross" />
+			</div>
+			<div>
+				<button type="submit" class="btn btn-primary">Dodaj</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	private EmployeeDto employeeDto = new EmployeeDto();
+
+	[Parameter]
+	public EventCallback OnSubmitCallback { get; set; }
+
+	public async Task HandleValidSubmit()
+	{
+		await Http.PostAsJsonAsync<EmployeeDto>("api/employees", employeeDto);
+		await OnSubmitCallback.InvokeAsync();
+	}
+}

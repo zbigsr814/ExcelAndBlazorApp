@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAndBlazorApp.Server", "ExcelAndBlazorApp\Server\ExcelAndBlazorApp.Server.csproj", "{CBCF303B-0544-4302-A596-54CB7E788787}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAndBlazorApp.Server", "ExcelAndBlazorApp\Server\ExcelAndBlazorApp.Server.csproj", "{CBCF303B-0544-4302-A596-54CB7E788787}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAndBlazorApp.Client", "ExcelAndBlazorApp\Client\ExcelAndBlazorApp.Client.csproj", "{F02C33F2-178D-4CA5-8A09-51C4C89219FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAndBlazorApp.Client", "ExcelAndBlazorApp\Client\ExcelAndBlazorApp.Client.csproj", "{F02C33F2-178D-4CA5-8A09-51C4C89219FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAndBlazorApp.Shared", "ExcelAndBlazorApp\Shared\ExcelAndBlazorApp.Shared.csproj", "{7C5049F3-FE0B-4B13-A9D5-19AD557CEFF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAndBlazorApp.Shared", "ExcelAndBlazorApp\Shared\ExcelAndBlazorApp.Shared.csproj", "{7C5049F3-FE0B-4B13-A9D5-19AD557CEFF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

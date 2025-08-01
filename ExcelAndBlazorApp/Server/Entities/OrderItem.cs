@@ -8,7 +8,7 @@ namespace ExcelAndBlazorApp.Entities
         public int OrderId { get; set; }        // wiązanie 1 Order => wiele OrderItems
         public Order Order { get; set; }        // wiązanie 1 Order => wiele OrderItems
 
-        public string ItemName { get; set; } = "";
+        public string ItemName { get; set; }
         public decimal PriceGross { get; set; }
         public int Quantity { get; set; }
     }

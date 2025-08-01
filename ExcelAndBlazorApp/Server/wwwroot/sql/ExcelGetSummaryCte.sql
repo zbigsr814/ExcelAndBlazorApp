@@ -22,7 +22,7 @@ MonthlyContractsGross AS (
 	GROUP BY YEAR(c.StartDate), MONTH(c.StartDate)
 )
 SELECT 
-	FORMAT(COALESCE(me.YearMonth, mo.YearMonth, mc.YearMonth), 'MM-yyyy') AS 'YearMonth',
+	FORMAT(COALESCE(me.YearMonth, mo.YearMonth, mc.YearMonth), 'MM/yyyy') AS 'YearMonth',
 	CAST(ISNULL(me.MonthlySalarysExpenses, 0) AS decimal(18, 2)) AS 'EmployeesExpenses',
 	CAST(ISNULL(mo.MonthlyOrdersExpenses, 0) AS decimal(18, 2)) AS 'OrdersExpenses',
 	CAST(ISNULL(mc.MonthlyIncomes, 0) AS decimal(18, 2)) AS 'CompanyIncomes',

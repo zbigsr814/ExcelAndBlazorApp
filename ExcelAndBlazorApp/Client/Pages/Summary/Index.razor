@@ -2,8 +2,8 @@
 @using ExcelAndBlazorApp.Shared.Dtos
 @inject HttpClient Http
 
-<a href="api/summary/excel" >
-    <button class="btn btn-primary w-50 h-25">Pobierz raport</button>
+<a href="api/summary/excel">
+	<button class="btn btn-primary w-50 h-25">Pobierz raport</button>
 </a>
 
 <br />
@@ -11,33 +11,49 @@
 
 @if (summary is null)
 {
-    <p>Ładowanie danych...</p>
+	<p>Ładowanie danych...</p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Koszt pracowników</th>
-                <th>Koszt materiałów</th>
-                <th>Dochód firmy</th>
-                <th>Przychód brutto</th>
-                <th>Przychód netto</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var summary in summary)
-            {
-                <tr>
-                    <td>@summary.YearMonth</td>
-                    <td>@summary.EmployeesExpenses</td>
-                    <td>@summary.OrdersExpenses</td>
-                    <td>@summary.CompanyIncomes</td>
-                    <td>@summary.ProfitBrutto</td>
-                    <td>@summary.ProfitNetto</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Data</th>
+				<th>Koszt pracowników</th>
+				<th>Koszt materiałów</th>
+				<th>Dochód firmy</th>
+				<th>Przychód brutto</th>
+				<th>Przychód netto</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var summary in summary)
+			{
+				<tr>
+					<td>@summary.YearMonth</td>
+					<td>@summary.EmployeesExpenses</td>
+					<td>@summary.OrdersExpenses</td>
+					<td>@summary.CompanyIncomes</td>
+					<td>@summary.ProfitBrutto</td>
+					<td>@summary.ProfitNetto</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+
+@code {
+	private SummaryDto[] summary;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		summary = await Http.GetFromJsonAsync<SummaryDto[]>("api/summary");
+		StateHasChanged();
+	}
 }
